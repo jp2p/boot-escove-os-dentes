@@ -43,6 +43,53 @@ fibonacci_end:
     pop bx
     pop ax
     ret
+-----------------------------------------------------------------------------------------------------------------------------------------
+; Pushs all important registers and puts zero on base register
+read_integer:
+    push ax
+    push cx
+    mov bx, 0
+
+; Only reads the integers and ignores other ascii characters
+while_read_integer:
+    
+    ;Prepare to read the number
+    mov ah, 0x00 ; Chooses the function that reads keyboard
+    int 0x16     ; Interupt on keyboard services
+
+    ;Checks if the value that was read is '\n'
+    cmp al, 13   ; If the number is equal to 13 then it is a '\n'
+    je stop_read_integer
+
+    ;Reads the number
+    mov ah, 0xe  ; Chooses the function thet prints a character 
+    int 0x10     ; Interrupt on video services
+
+    ;This section makes so ignoring not number ascii characters is possible
+   ; cmp al, '0'  ; Checks if the read number is less than '0' character
+    ;jl while_read_integer
+
+    ;cmp al, '9'  ; Checks if the read number is greater than '9' character
+    ;jg while_read_integer
+    
+    ;Finaly armazenate the read number
+    movzx dx, al ; Stores the read number on dx
+   
+    sub dx, '0'  ; Translates from ascii to integer the numbers
+
+    imul bx, 0xa  ; Multiplies by 10 the real number that is being read
+
+    add bx, dx   ; Adds the new character to the real number
+
+    jmp while_read_integer
+
+; Pops back all the values stored and returns where it stoped
+stop_read_integer: 
+    pop cx
+    pop ax
+    ret
+
+
 
 times 510-($-$$) db 0
 dw 0xaa55
